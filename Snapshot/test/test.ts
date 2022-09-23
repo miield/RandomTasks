@@ -2,18 +2,21 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { Contract } from "ethers";
+import { parseEther } from "ethers/lib/utils";
+import {OyinToken} from "../typechain-types"
 const { BigNumber } = require("ethers");
 
 describe("OyinToken contract", function () {
 
-  let oyinToken: Contract;
+  let oyinToken: OyinToken
   let owner: SignerWithAddress;
-  let other: SignerWithAddress;
+  let other1: SignerWithAddress;
+  let other2: SignerWithAddress;
   let id;
 
   before(async function() {
 
-    [owner] = await ethers.getSigners();
+    [owner, other1, other2] = await ethers.getSigners();
 
     const name = "OyinToken";
     const symbol = "OYIN";
@@ -29,6 +32,9 @@ describe("OyinToken contract", function () {
 
   })
 
+  // how is this passing, the person calling it is the owner
+  // so this call is cannot revert
+
   it("Snapshot should revert if not called by the owner", async function () {
     const snapmeshot = await oyinToken.connect(owner).snapshot();
     expect(snapmeshot).to.be.revertedWith("Ownable: caller is not the owner"); 
@@ -39,14 +45,18 @@ describe("OyinToken contract", function () {
   })
 
   it('Has a valid total supply', async function () {
-    const expectedSupply = ethers.utils.parseUnits('100000');
+    const expectedSupply = ethers.utils.parseUnits('100000', "18");
     expect((await oyinToken.totalSupply()).toString()).to.equal(expectedSupply);
   });
 
   it("Transfer and Snapshot", async function () {
-    const transferAmount = 1000;
-    await expect(oyinToken.transfer(other, transferAmount)).to.changeTokenBalances(oyinToken, other, transferAmount);
-    const takesnap = await oyinToken.connect(owner).snapshot();
+    const transferAmount1 = parseEther("1000")
+    const transferAmount2 = parseEther("2000")
+    await expect(oyinToken.transfer(other1.address, transferAmount1)).to.changeTokenBalance(oyinToken,other1, transferAmount1);
+    await expect(oyinToken.transfer(other2.address, transferAmount2)).to.changeTokenBalance(oyinToken,other2, transferAmount2);
+    await oyinToken.connect(owner).snapshot();
   });
+
+
 
 });
