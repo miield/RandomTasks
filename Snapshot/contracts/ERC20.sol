@@ -7,8 +7,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract OyinToken is ERC20Snapshot, Ownable {
 
+    uint256 constant total_Supply = 100000 * (10 ** 18);
+
     constructor() ERC20("OYIN TOKEN", "OYIN") {
-        _mint(msg.sender, 100000000000000000000);
+        _mint(msg.sender, total_Supply);
     }
 
     function snapshot() public onlyOwner returns (uint256){

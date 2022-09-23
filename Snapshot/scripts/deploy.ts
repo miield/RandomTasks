@@ -10,7 +10,6 @@ async function main() {
   const totalSupply = hre.ethers.utils.parseUnits("100000", 18);
 
   const OyinToken = await ethers.getContractFactory("contracts/ERC20.sol:OyinToken");
-  // const oyinToken = await OyinToken.connect(deployer).deploy(name, symbol, totalSupply, decimals);
   const oyinToken = await OyinToken.connect(deployer).deploy();
 
   await oyinToken.deployed();
