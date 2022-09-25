@@ -19,9 +19,6 @@ describe("OyinToken contract", function () {
 
     [owner, other1, other2] = await ethers.getSigners();
 
-    const name = "OYIN TOKEN";
-    const symbol = "OYIN";
-    const totalSupply = ethers.utils.parseUnits("100000", 18);
 
     const OyinToken = await ethers.getContractFactory("OyinToken");
     oyinToken = await OyinToken.connect(owner).deploy();
@@ -29,7 +26,6 @@ describe("OyinToken contract", function () {
     await oyinToken.deployed();
     console.log("OyinToken is deployed to:", oyinToken.address);
 
-    const decimals = await oyinToken.decimals();
 
   })
 
@@ -61,7 +57,7 @@ describe("OyinToken contract", function () {
 
   it('Checks for Snapshot ID', async function () {
     await oyinToken.connect(owner).snapshot();
-    expect (await oyinToken.checkSnapshot());
+    expect(await oyinToken.checkSnapshot()).to.be.equal(1);
   });
 
   it("Transfer and Snapshot", async function () {
@@ -71,6 +67,18 @@ describe("OyinToken contract", function () {
     await expect(oyinToken.transfer(other2.address, transferAmount2)).to.changeTokenBalance(oyinToken,other2, transferAmount2);
     await oyinToken.connect(owner).snapshot();
   });
+
+  it("other1 and other2 should have have a balance of 0 at snapshotId one", async function(){
+    expect(await oyinToken.balanceOfAt(other1.address, 1)).to.be.equal(0)
+    expect(await oyinToken.balanceOfAt(other2.address, 1)).to.be.equal(0)
+  } )
+
+  it("other1 and other2 should have have a balance of 1000 and 2000 respectively at snapshotId two", async function(){
+    const transferAmount1 = parseEther("1000")
+    const transferAmount2 = parseEther("2000")
+    expect(await oyinToken.balanceOfAt(other1.address, 2)).to.be.equal(transferAmount1)
+    expect(await oyinToken.balanceOfAt(other2.address, 2)).to.be.equal(transferAmount2)
+  } )
 
 
 
