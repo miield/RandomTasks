@@ -5,6 +5,7 @@ import { Contract } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import {OyinToken} from "../typechain-types"
 const { BigNumber } = require("ethers");
+require("@nomicfoundation/hardhat-chai-matchers")
 
 describe("OyinToken contract", function () {
 
@@ -18,7 +19,7 @@ describe("OyinToken contract", function () {
 
     [owner, other1, other2] = await ethers.getSigners();
 
-    const name = "OyinToken";
+    const name = "OYIN TOKEN";
     const symbol = "OYIN";
     const totalSupply = ethers.utils.parseUnits("100000", 18);
 
@@ -36,17 +37,31 @@ describe("OyinToken contract", function () {
   // so this call is cannot revert
 
   it("Snapshot should revert if not called by the owner", async function () {
-    const snapmeshot = await oyinToken.connect(owner).snapshot();
-    expect(snapmeshot).to.be.revertedWith("Ownable: caller is not the owner"); 
+    await expect(oyinToken.connect(other1).snapshot()).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
   it('Has a valid decimal', async function () {
     expect((await oyinToken.decimals()).toString()).to.equal('18');
   })
 
+  it('Creates the token symbol', async function () {
+    // expect(await oyinToken.symbol()).to.exist;
+    expect(await oyinToken.symbol()).to.equal('OYIN');
+  });
+
+  it('Creates the token name', async function () {
+    // expect(await oyinToken.name()).to.exist;
+    expect(await oyinToken.name()).to.equal('OYIN TOKEN');
+  });
+
   it('Has a valid total supply', async function () {
     const expectedSupply = ethers.utils.parseUnits('100000', "18");
     expect((await oyinToken.totalSupply()).toString()).to.equal(expectedSupply);
+  });
+
+  it('Checks for Snapshot ID', async function () {
+    await oyinToken.connect(owner).snapshot();
+    expect (await oyinToken.checkSnapshot());
   });
 
   it("Transfer and Snapshot", async function () {
